@@ -21,7 +21,7 @@ export default function SearchBlock() {
     };
 
     const handleFormSubmit = (e) => {
-        push(`/?search=${searchValue}`);
+        push(`/videos?search=${searchValue}`);
         e.preventDefault();
     };
 

@@ -1,0 +1,33 @@
+@import './variables.scss';
+
+.title {
+    margin: 0 0 25px 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    .clearButton {
+        font-size: 20px;
+        font-weight: 700px;
+        transition: all 0.4s ease 0s;
+        cursor: pointer;
+        &:hover {
+            @media (min-width: $md2+px) {
+                color: #9458ee;
+            }
+        }
+    }
+}
+
+.row {
+    display: flex;
+    margin: 0 -15px;
+    flex-wrap: wrap;
+
+    .column {
+        flex: 0 0 25%;
+        padding: 0 15px;
+        margin: 0 0 30px 0;
+    }
+}

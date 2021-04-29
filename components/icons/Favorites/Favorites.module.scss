@@ -1,0 +1,24 @@
+@import '../../../styles/variables.scss';
+
+.favorites {
+    &.active {
+        path {
+            fill: #9458ee;
+        }
+    }
+
+    &.hv {
+        @media (min-width: $md2+px) {
+            path {
+                transition: all 0.4s ease 0s;
+            }
+            &:hover {
+                path {
+                    &:first-child {
+                        fill: #9458ee;
+                    }
+                }
+            }
+        }
+    }
+}

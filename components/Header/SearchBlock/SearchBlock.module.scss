@@ -1,0 +1,35 @@
+@import '../../../styles/variables.scss';
+
+.searchBlock {
+    display: flex;
+    .textFieldWrapper {
+        position: relative;
+        width: 100%;
+    }
+    .textField {
+        border-right-width: 0;
+        border-bottom-right-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+        padding-right: 40px;
+    }
+    .crossReset {
+        position: absolute;
+        top: 18px;
+        right: 15px;
+    }
+    .searchIcon {
+        margin: 0 5px -2.5px 0;
+    }
+    .button {
+        border-bottom-left-radius: 0;
+        border-top-left-radius: 0;
+        @media (max-width: $md3+px) {
+            padding: 9.5px;
+        }
+    }
+    .buttonText {
+        @media (max-width: $md3+px) {
+            display: none;
+        }
+    }
+}

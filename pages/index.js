@@ -1,65 +1,106 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React from 'react';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useRouter } from 'next/router';
+import { wrapper } from '../redux/store';
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+import styles from '../styles/Home.module.scss';
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+import VideoCard from '../components/videoCard';
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+import { fetchVideos, clearVideos } from '../redux/actions/videos';
+import { addToFavorites, removeFromFavorites } from '../redux/actions/favorites';
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+import Title from '../components/Title';
+import { Button } from '../components/forms';
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+import { selectFavoriteItemsIds } from '../selectors/favorites';
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+export default function Home({ searchValue }) {
+    const [isLoading, setIsLoading] = React.useState(false);
+    const paginationCursorRef = React.useRef(null);
+    const isFirstTimeDidMountRef = React.useRef(false);
+    const router = useRouter();
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+    const dispatch = useDispatch();
+    const { items, paginationCursor, favoriteItemsIds } = useSelector(
+        ({ videos, ...state }) => ({
+            items: videos.items,
+            paginationCursor: videos.pagination.cursor,
+            favoriteItemsIds: selectFavoriteItemsIds(state),
+        }),
+        shallowEqual,
+    );
+
+    console.log(favoriteItemsIds);
+
+    paginationCursorRef.current = paginationCursor;
+
+    React.useEffect(async () => {
+        if (isFirstTimeDidMountRef && isLoading) {
+            await dispatch(fetchVideos(searchValue, paginationCursor));
+            setIsLoading(false);
+        }
+
+        isFirstTimeDidMountRef.current = true;
+    }, [isLoading]);
+
+    React.useEffect(() => {
+        const scrollHandler = (e) => {
+            if (
+                e.target.documentElement.scrollHeight -
+                    (e.target.documentElement.scrollTop + window.innerHeight) <
+                    100 &&
+                paginationCursorRef.current
+            ) {
+                setIsLoading(true);
+            }
+        };
+        document.addEventListener('scroll', scrollHandler);
+
+        return () => {
+            document.removeEventListener('scroll', scrollHandler);
+        };
+    }, []);
+
+    const handleFavoritesButtonVideoClick = async (id, isFavorite) => {
+        if (!isFavorite) {
+            return dispatch(addToFavorites(id));
+        }
+        return dispatch(removeFromFavorites(id));
+    };
+
+    return (
+        <div className="container">
+            <Title className={styles.title}>
+                По запросу {searchValue ? <span>{`"${searchValue}"`}</span> : <span>"ничего"</span>}{' '}
+                {items.length > 0 && 'найдены видео канала'}{' '}
+                {items.length > 0 && <span>{`"${items[0].user_name}"`}</span>}
+                {items.length === 0 && 'не нашлись видео'}
+            </Title>
+            <div className={styles.row}>
+                {items.length > 0 &&
+                    items.map((item) => (
+                        <div className={styles.column} key={item.id}>
+                            <VideoCard
+                                {...item}
+                                onFavoritesButtonClick={handleFavoritesButtonVideoClick}
+                                isFavorite={favoriteItemsIds.includes(item.id)}
+                            />
+                        </div>
+                    ))}
+            </div>
+            {isLoading && <Title className={styles.title}>Загрузка...</Title>}
         </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    );
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(async ({ store, pathname, query }) => {
+    const { search } = query;
+    store.dispatch(clearVideos());
+    await store.dispatch(fetchVideos(search));
+    return {
+        props: {
+            searchValue: search ? search : '',
+        },
+    };
+});

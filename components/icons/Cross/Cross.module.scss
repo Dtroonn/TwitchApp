@@ -1,0 +1,19 @@
+@import '../../../styles/variables.scss';
+
+.cross {
+    fill: none;
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+    path {
+        transition: all 0.4s ease 0s;
+    }
+    &:hover {
+        @media (min-width: $md2+px) {
+            path {
+                fill-opacity: 1;
+                fill: #6441a4;
+            }
+        }
+    }
+}

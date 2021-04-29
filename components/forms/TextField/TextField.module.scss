@@ -1,0 +1,21 @@
+.textField {
+    width: 100%;
+    display: block;
+    appearance: none;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px !important;
+    font-size: 16px;
+    height: 46px;
+    line-height: 44px;
+    background: transparent;
+    padding: 0 15px;
+    &::placeholder {
+        color: rgba(0, 0, 0, 0.2);
+    }
+    &:focus {
+        border-color: #6441a4;
+        &::placeholder {
+            font-size: 0;
+        }
+    }
+}
